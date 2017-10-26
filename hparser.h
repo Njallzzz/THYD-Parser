@@ -118,8 +118,12 @@ private:
     // Add your private functions and variables here below ...
     ProgramNode* program();
     std::list<VariableDeclarationNode*>* variable_declarations();
+    std::list<MethodNode*>* method_declarations();
+    ValueType method_type();
+    std::list<ParameterNode*>* parameters();
     std::list<VariableExprNode*>* variable_list();
     VariableExprNode* variable();
     ValueType type();
+    std::string method_name();
 };
 #endif //DECAFPARSER_HPARSER_H
