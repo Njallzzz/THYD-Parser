@@ -275,24 +275,53 @@ HParser::op_incr_decr( VariableExprNode *var ) {
 
 ExprNode*
 HParser::expr() {
-    // Unfinished
-    AndExprNode* and_node = expr_and();
-    ExprNode* expr_delta_node = expr_delta( and_node );
-    return new AndExprNode(and_node, expr_delta_node);
+    return expr_delta( expr_and() );
 }
 
-OrExprNode*
+ExprNode*
 HParser::expr_delta(ExprNode* other) {
-    /*if(token_.type != decaf::token_type::OpLogOr)
-        return nullptr;
-    return OrExprNode(other, expr_and()); */
+    if(token_.type != decaf::token_type::OpLogOr)
+        return other;
+    match( decaf::token_type::OpLogOr );
+    return expr_delta( new OrExprNode(other, expr_and()) );
 }
 
-AndExprNode*
+ExprNode*
 HParser::expr_and() {
+    return expr_and_delta( expr_eq() );
+}
+
+ExprNode*
+HParser::expr_and_delta(ExprNode* other) {
+    if(token_.type != decaf::token_type::OpLogAnd)
+        return other;
+    match( decaf::token_type::OpLogAnd );
+    return expr_and_delta( new AndExprNode(other, expr_eq()) );
+}
+
+ExprNode*
+HParser::expr_eq() {
+    return expr_eq_delta( expr_rel() );
+}
+
+ExprNode*
+HParser::expr_eq_delta(ExprNode* other) {
+    if(token_.type != decaf::token_type::OpLogAnd)
+        return other;
+    // Unfinished
+    match( decaf::token_type::OpLogAnd );
+    return expr_eq_delta( new AndExprNode(other, expr_rel()) );
+}
+
+ExprNode*
+HParser::expr_rel() {
 
 }
 
+ExprNode*
+HParser::expr_rel_delta(ExprNode* other) {
+
+}
 
 ExprNode*
 HParser::optiona_expr() {

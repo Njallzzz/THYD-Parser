@@ -127,8 +127,13 @@ private:
     void more_expr(std::list<ExprNode*>* list);
 
     ExprNode* expr();
-    OrExprNode* expr_delta(ExprNode* other);
-    AndExprNode* expr_and();
+    ExprNode* expr_delta(ExprNode* other);
+    ExprNode* expr_and();
+    ExprNode* expr_and_delta(ExprNode* other);
+    ExprNode* expr_eq();
+    ExprNode* expr_eq_delta(ExprNode* other);
+    ExprNode* expr_rel();
+    ExprNode* expr_rel_delta(ExprNode* other);
 
     ExprNode* factor();
 
