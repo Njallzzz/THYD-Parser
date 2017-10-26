@@ -120,6 +120,16 @@ private:
     std::list<VariableDeclarationNode*>* variable_declarations();
     std::list<MethodNode*>* method_declarations();
     ValueType method_type();
+    std::list<StmNode*>* statement_list();
+    StmNode* id_start_stm();
+    IncrDecrStmNode* op_incr_decr( VariableExprNode *var );
+
+    ExprNode* optiona_expr();
+    ExprNode* expr();
+    std::list<ExprNode*>* expr_list();
+
+    BlockStmNode* statement_block();
+    BlockStmNode* optional_else();
     std::list<ParameterNode*>* parameters();
     std::list<VariableExprNode*>* variable_list();
     VariableExprNode* variable();
