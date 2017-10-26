@@ -122,10 +122,23 @@ private:
     ValueType method_type();
     std::list<StmNode*>* statement_list();
     StmNode* id_start_stm();
-    IncrDecrStmNode* op_incr_decr( VariableExprNode *var );
 
     ExprNode* optiona_expr();
+    void more_expr(std::list<ExprNode*>* list);
+
     ExprNode* expr();
+    OrExprNode* expr_delta(ExprNode* other);
+    AndExprNode* expr_and();
+
+    ExprNode* factor();
+
+    ExprNode* op_eq(ExprNode *lhs, ExprNode *rhs);
+    ExprNode* op_rel(ExprNode *lhs, ExprNode *rhs);
+    ExprNode* op_add(ExprNode *lhs, ExprNode *rhs);
+    ExprNode* op_mul(ExprNode *lhs, ExprNode *rhs);
+    ExprNode* op_unary(ExprNode *rhs);
+    IncrDecrStmNode* op_incr_decr( VariableExprNode *var );
+
     std::list<ExprNode*>* expr_list();
 
     BlockStmNode* statement_block();

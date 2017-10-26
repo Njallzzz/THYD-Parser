@@ -157,6 +157,107 @@ HParser::id_start_stm() {
     return node;
 }
 
+ExprNode*
+HParser::op_eq(ExprNode *lhs, ExprNode *rhs) {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::OpRelEQ) {
+        match( decaf::token_type::OpRelEQ );
+        node = new EqExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpRelNEQ) {
+        match( decaf::token_type::OpRelNEQ );
+        node = new NeqExprNode(lhs, rhs);
+    }
+    else {
+        error(decaf::token_type::OpRelEQ);
+    }
+    return node;
+}
+
+ExprNode*
+HParser::op_rel(ExprNode *lhs, ExprNode *rhs) {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::OpRelGT) {
+        match( decaf::token_type::OpRelGT );
+        node = new GtExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpRelGTE) {
+        match( decaf::token_type::OpRelGTE );
+        node = new GteExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpRelLT) {
+        match( decaf::token_type::OpRelLT );
+        node = new LtExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpRelLTE) {
+        match( decaf::token_type::OpRelLTE );
+        node = new LteExprNode(lhs, rhs);
+    }
+    else {
+        error(decaf::token_type::OpRelGT);
+    }
+    return node;
+}
+
+ExprNode*
+HParser::op_add(ExprNode *lhs, ExprNode *rhs) {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::OpArtPlus) {
+        match( decaf::token_type::OpArtPlus );
+        node = new PlusExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpArtMinus) {
+        match( decaf::token_type::OpArtMinus );
+        node = new MinusExprNode(lhs, rhs);
+    }
+    else {
+        error(decaf::token_type::OpArtPlus);
+    }
+    return node;
+}
+
+ExprNode*
+HParser::op_mul(ExprNode *lhs, ExprNode *rhs) {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::OpArtMult) {
+        match( decaf::token_type::OpArtMult );
+        node = new MultiplyExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpArtDiv) {
+        match( decaf::token_type::OpArtDiv );
+        node = new DivideExprNode(lhs, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpArtModulus) {
+        match( decaf::token_type::OpArtModulus );
+        node = new ModulusExprNode(lhs, rhs);
+    }
+    else {
+        error(decaf::token_type::OpArtMult);
+    }
+    return node;
+}
+
+ExprNode*
+HParser::op_unary(ExprNode *rhs) {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::OpArtPlus) {
+        match( decaf::token_type::OpArtPlus );
+        node = new PlusExprNode(nullptr, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpArtMinus) {
+        match( decaf::token_type::OpArtMinus );
+        node = new MinusExprNode(nullptr, rhs);
+    }
+    else if(token_.type == decaf::token_type::OpLogNot) {
+        match( decaf::token_type::OpLogNot );
+        node = new NotExprNode(rhs);
+    }
+    else {
+        error(decaf::token_type::OpArtPlus);
+    }
+    return node;
+}
+
 IncrDecrStmNode*
 HParser::op_incr_decr( VariableExprNode *var ) {
     IncrDecrStmNode* node = nullptr;
@@ -175,13 +276,23 @@ HParser::op_incr_decr( VariableExprNode *var ) {
 ExprNode*
 HParser::expr() {
     // Unfinished
-    match(token_.type);
-    match(token_.type);
-    match(token_.type);
-    ExprNode* node = new MethodCallExprStmNode(token_.lexeme, new std::list<ExprNode*>());
-    match(token_.type);
-    return node;
+    AndExprNode* and_node = expr_and();
+    ExprNode* expr_delta_node = expr_delta( and_node );
+    return new AndExprNode(and_node, expr_delta_node);
 }
+
+OrExprNode*
+HParser::expr_delta(ExprNode* other) {
+    /*if(token_.type != decaf::token_type::OpLogOr)
+        return nullptr;
+    return OrExprNode(other, expr_and()); */
+}
+
+AndExprNode*
+HParser::expr_and() {
+
+}
+
 
 ExprNode*
 HParser::optiona_expr() {
@@ -189,10 +300,46 @@ HParser::optiona_expr() {
     return nullptr;
 }
 
+void
+HParser::more_expr(std::list<ExprNode*>* list) {
+    if(token_.type != decaf::token_type::ptComma)
+        return;
+    match(decaf::token_type::ptComma);
+    list->push_back( expr() );
+    more_expr(list);
+}
+
 std::list<ExprNode*>*
 HParser::expr_list() {
     // Unfinished
     std::list<ExprNode*>* node = new std::list<ExprNode*>();
+    return node;
+}
+
+ExprNode*
+HParser::factor() {
+    ExprNode* node = nullptr;
+    if(token_.type == decaf::token_type::Number) {
+        node = new NumberExprNode(token_.lexeme);
+        match( decaf::token_type::Number );
+    }
+    else if(token_.type == decaf::token_type::ptLParen) {
+        match( decaf::token_type::ptLParen );
+        node = expr();
+        match( decaf::token_type::ptRParen );
+    }
+    else if(token_.type == decaf::token_type::Identifier) {
+        VariableExprNode* var = variable();
+        if(token_.type == decaf::token_type::ptLParen) {
+            match( decaf::token_type::ptLParen );
+            node = new MethodCallExprStmNode( var->str(), expr_list());
+            match( decaf::token_type::ptRParen );
+        } else {
+            node = var;
+        }
+    } else {
+        error( decaf::token_type::Number );
+    }
     return node;
 }
 
