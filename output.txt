@@ -1,0 +1,177 @@
+(CLASS Program 
+   (DECLARE int 
+      (VAR i) 
+      (VAR j)) 
+   (DECLARE real 
+      (VAR x)) 
+   (METHOD int factorial 
+      (PARAM int
+         (VAR n))
+      (IF 
+         (<= 
+            (VAR n) 
+            (NUM 1))
+         (BLOCK 
+            (RET 
+               (NUM 1))))
+      (RET 
+         (CALL factorial 
+            (- 
+               (VAR n) 
+               (NUM 1))))) 
+   (METHOD real exponent 
+      (PARAM real
+         (VAR b))
+      (PARAM int
+         (VAR e))
+      (DECLARE real 
+         (VAR product))
+      (DECLARE int 
+         (VAR i))
+      (IF 
+         (== 
+            (VAR e) 
+            (NUM 0))
+         (BLOCK 
+            (= 
+               (VAR product) 
+               (NUM 1.0)))
+         (BLOCK 
+            (IF 
+               (> 
+                  (VAR e) 
+                  (NUM 0))
+               (BLOCK 
+                  (= 
+                     (VAR product) 
+                     (VAR b)) 
+                  (FOR 
+                     (= 
+                        (VAR i) 
+                        (NUM 1))
+                     (< 
+                        (VAR i) 
+                        (VAR e))
+                     (++ 
+                        (VAR i))
+                     (BLOCK 
+                        (= 
+                           (VAR product) 
+                           (* 
+                              (VAR product) 
+                              (VAR b))))))
+               (BLOCK 
+                  (= 
+                     (VAR product) 
+                     (VAR b)) 
+                  (FOR 
+                     (= 
+                        (VAR i) 
+                        (NUM 1))
+                     (< 
+                        (VAR i) 
+                        (-
+                           (VAR e)))
+                     (++
+                        (VAR i))
+                     (BLOCK
+                        (=
+                           (VAR product)
+                           (*
+                              (VAR product)
+                              (VAR b)))))
+                  (=
+                     (VAR product)
+                     (/
+                        (NUM 1.0)
+                        (VAR product)))))))
+      (RET
+         (VAR product)))
+   (METHOD void odd
+      (PARAM int
+         (VAR n))
+      (RET
+         (%
+            (VAR n)
+            (NUM 2))))
+   (METHOD int test_math
+      (DECLARE int
+         (VAR n)
+         (VAR m))
+      (DECLARE real
+         (VAR r))
+      (=
+         (VAR n)
+         (CALL factorial
+            (NUM 5)))
+      (=
+         (VAR r)
+         (CALL exponent
+            (NUM 2.0)
+            (NUM 10)))
+      (=
+         (VAR r)
+         (CALL exponent
+            (NUM 2.0)
+            (-
+               (NUM 2))))
+      (=
+         (VAR r)
+         (CALL exponent
+            (NUM 2.0)
+            (NUM 0)))
+      (=
+         (VAR m)
+         (CALL odd
+            (NUM 3)))
+      (=
+         (VAR m)
+         (CALL odd
+            (NUM 2))))
+   (METHOD void main
+      (DECLARE int
+         (VAR i))
+      (CALL test_math)
+      (FOR
+         (=
+            (VAR i)
+            (NUM 5))
+         (>=
+            (VAR i)
+            (NUM 0))
+         (--
+            (VAR i))
+         (BLOCK
+            (IF
+               (CALL odd
+                  (VAR i))
+               (BLOCK
+                  (CONTINUE)))
+            (IF
+               (!=
+                  (+
+                     (NUM 1)
+                     (*
+                        (NUM 2)
+                        (NUM 3)))
+                  (-
+                     (+
+                        (-
+                           (NUM 7)))))
+               (BLOCK
+                  (BREAK)))))
+      (=
+         (VAR i)
+         (||
+            (&&
+               (&&
+                  (NUM 1)
+                  (NUM 1))
+               (NUM 1))
+            (&&
+               (NUM 1)
+               (!
+                  (NUM 0)))))
+      (BLOCK 
+         (-- 
+            (VAR i)))))

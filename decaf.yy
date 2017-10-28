@@ -80,8 +80,8 @@ class Parser;
 
 %type <std::list<VariableDeclarationNode*>*> variable_declarations
 %type <std::list<VariableExprNode*>*> variable_list
-%type <std::list<ParameterNode*>*> parameters
 %type <std::list<ParameterNode*>*> parameter_list
+%type <std::list<ParameterNode*>*> parameters
 %type <std::list<MethodNode*>*> method_declarations
 %type <std::list<ExprNode*>*> more_expressions
 %type <std::list<ExprNode*>*> expression_list
@@ -92,8 +92,8 @@ class Parser;
 %type <BlockStmNode*> optional_else
 %type <MethodNode*> method_declaration
 %type <ExprNode*> optional_expression
-%type <ExprNode*> expression
 %type <ValueType> method_return_type
+%type <ExprNode*> expression
 %type <ValueType> type
 %type <StmNode*> statement
 
@@ -136,8 +136,6 @@ method_declaration: kwStatic method_return_type Identifier
 method_return_type: type
                     { $$ = $1; }
                     | kwVoid { $$ = ValueType::VoidVal; }
-
-
 
 parameters: parameter_list
             { $$ = $1; }
@@ -220,27 +218,23 @@ expression: expression OpLogOr expression
             | ptLParen expression ptRParen
               { $$ = $2; }
             | OpArtPlus expression 
-              { $$ = $2; }
+              { $$ = new PlusExprNode($2); }
             | OpArtMinus expression 
-              { $$ = $2; }
+              { $$ = new MinusExprNode($2); }
             | OpLogNot expression 
-              { $$ = $2; }
+              { $$ = new NotExprNode($2); }
             | variable 
               { $$ = $1; }
             | Number
               { $$ = new NumberExprNode($1); }
             
-
-
 expression_list: expression more_expressions
-                 { $$ = $2; $$->push_back($1); }
+                 { $$ = $2; $$->push_front($1); }
                  | { $$ = new std::list<ExprNode*>(); } 
 
 more_expressions: ptComma expression more_expressions
-                  { $$ = $3; $$->push_back($2); }
+                  { $$ = $3; $3->push_back($2); }
                   | { $$ = new std::list<ExprNode*>(); }
-            
-
 %%
 
 ////////////////////////////////////////////////////////////////////////////////////
