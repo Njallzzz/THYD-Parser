@@ -467,13 +467,14 @@ HParser::factor() {
         match( decaf::token_type::ptRParen );
     }
     else if(token_.type == decaf::token_type::Identifier) {
-        VariableExprNode* var = variable();
+        std::string func_name = token_.lexeme;
+        match( decaf::token_type::Identifier );
         if(token_.type == decaf::token_type::ptLParen) {
             match( decaf::token_type::ptLParen );
-            node = new MethodCallExprStmNode( var->str(), expr_list());
+            node = new MethodCallExprStmNode( func_name, expr_list() );
             match( decaf::token_type::ptRParen );
         } else {
-            node = var;
+            node = new VariableExprNode(func_name);
         }
     } else {
         error( decaf::token_type::Identifier );
