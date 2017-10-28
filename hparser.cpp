@@ -3,6 +3,8 @@
 
 using namespace std;
 
+//#define DEBUG_EXPR 1
+
 int HParser::parse()
 {
     set_AST( program() );
@@ -17,8 +19,8 @@ HParser::program() {
     match( decaf::token_type::ptLBrace );
     auto list_vdn = variable_declarations();
     auto list_mdn = method_declarations();
-//    match( decaf::token_type::ptRBrace );
- //   match( decaf::token_type::EOI );
+    match( decaf::token_type::ptRBrace );
+    match( decaf::token_type::EOI );
     return new ProgramNode(name, list_vdn, list_mdn);
 }
 
@@ -50,7 +52,7 @@ HParser::method_declarations()
         match( decaf::token_type::ptLBrace );
         auto list_vdn = variable_declarations();
         auto list_sdn = statement_list();
-        //match( decaf::token_type::ptRBrace );
+        match( decaf::token_type::ptRBrace );
         list_mdn->push_back( new MethodNode( type, method_name, list_params, list_vdn, list_sdn ) );
     }
     return list_mdn;
@@ -90,23 +92,23 @@ HParser::statement_list() {
         else if(token_.type == decaf::token_type::kwReturn ) {
             match( decaf::token_type::kwReturn );
             node = new ReturnStmNode( optional_expr() );
+            match( decaf::token_type::ptSemicolon );
         }
         else if(token_.type == decaf::token_type::kwBreak ) {
             match( decaf::token_type::kwBreak );
             node = new BreakStmNode();
+            match( decaf::token_type::ptSemicolon );
         }
         else if(token_.type == decaf::token_type::kwContinue ) {
             match( decaf::token_type::kwContinue );
             node = new ContinueStmNode();
+            match( decaf::token_type::ptSemicolon );
         }
         else if(token_.type == decaf::token_type::ptLParen ) {
             node = statement_block();
         }
         else if(token_.type == decaf::token_type::Identifier ) {
-            id_start_stm();
-        }
-        else {
-            error( decaf::token_type::Identifier );
+            node = id_start_stm();
         }
 
         if(node != nullptr) {
@@ -115,7 +117,6 @@ HParser::statement_list() {
             return list_statements;
         }
     } while (1);
-    return list_statements;
 }
 
 BlockStmNode*
@@ -153,6 +154,7 @@ HParser::id_start_stm() {
     else {
         error( decaf::token_type::OpAssign );
     }
+
     match( decaf::token_type::ptSemicolon );
     return node;
 }
@@ -163,10 +165,12 @@ HParser::op_incr_decr( VariableExprNode *var ) {
     if(token_.type == decaf::token_type::OpArtInc) {
         match( decaf::token_type::OpArtInc );
         node = new IncrStmNode(var);
-    } else if(token_.type == decaf::token_type::OpArtDec) {
+    }
+    else if(token_.type == decaf::token_type::OpArtDec) {
         match( decaf::token_type::OpArtDec );
         node = new DecrStmNode(var);
-    } else {
+    }
+    else {
         error( decaf::token_type::OpArtInc );
     }
     return node;
@@ -174,6 +178,9 @@ HParser::op_incr_decr( VariableExprNode *var ) {
 
 ExprNode*
 HParser::expr() {
+#ifdef DEBUG_EXPR
+    std::cout << "expr" << std::endl;
+#endif
     return expr_delta( expr_and() );
 }
 
@@ -181,12 +188,18 @@ ExprNode*
 HParser::expr_delta(ExprNode* other) {
     if(token_.type != decaf::token_type::OpLogOr)
         return other;
+#ifdef DEBUG_EXPR
+    std::cout << "expr delta" << std::endl;
+#endif
     match( decaf::token_type::OpLogOr );
     return expr_delta( new OrExprNode(other, expr_and()) );
 }
 
 ExprNode*
 HParser::expr_and() {
+#ifdef DEBUG_EXPR
+    std::cout << "and" << std::endl;
+#endif
     return expr_and_delta( expr_eq() );
 }
 
@@ -194,12 +207,18 @@ ExprNode*
 HParser::expr_and_delta(ExprNode* other) {
     if(token_.type != decaf::token_type::OpLogAnd)
         return other;
+#ifdef DEBUG_EXPR
+    std::cout << "and delta" << std::endl;
+#endif
     match( decaf::token_type::OpLogAnd );
     return expr_and_delta( new AndExprNode(other, expr_eq()) );
 }
 
 ExprNode*
 HParser::expr_eq() {
+#ifdef DEBUG_EXPR
+    std::cout << "eq" << std::endl;
+#endif
     return expr_eq_delta( expr_rel() );
 }
 
@@ -228,11 +247,17 @@ HParser::expr_eq_delta(ExprNode* other) {
        token_.type != decaf::token_type::OpRelNEQ) {
         return other;
     }
+#ifdef DEBUG_EXPR
+    std::cout << "eq delta" << std::endl;
+#endif
     return expr_eq_delta( op_eq(other) );
 }
 
 ExprNode*
 HParser::expr_rel() {
+#ifdef DEBUG_EXPR
+    std::cout << "rel" << std::endl;
+#endif
     return expr_rel_delta( expr_add() );
 }
 
@@ -273,11 +298,17 @@ HParser::expr_rel_delta(ExprNode* other) {
        token_.type != decaf::token_type::OpRelLTE) {
         return other;
     }
+#ifdef DEBUG_EXPR
+    std::cout << "rel delta" << std::endl;
+#endif
     return expr_rel_delta( op_rel(other) );
 }
 
 ExprNode*
 HParser::expr_add() {
+#ifdef DEBUG_EXPR
+    std::cout << "add" << std::endl;
+#endif
     return expr_add_delta( expr_mult() );
 }
 
@@ -306,11 +337,17 @@ HParser::expr_add_delta(ExprNode* other) {
        token_.type != decaf::token_type::OpArtMinus) {
         return other;
     }
+#ifdef DEBUG_EXPR
+    std::cout << "add delta" << std::endl;
+#endif
     return expr_add_delta( op_add(other) );
 }
 
 ExprNode*
 HParser::expr_mult() {
+#ifdef DEBUG_EXPR
+    std::cout << "mult" << std::endl;
+#endif
     return expr_mult_delta( expr_unary() );
 }
 
@@ -345,6 +382,9 @@ HParser::expr_mult_delta(ExprNode* other) {
        token_.type != decaf::token_type::OpArtModulus) {
         return other;
     }
+#ifdef DEBUG_EXPR
+    std::cout << "mult delta" << std::endl;
+#endif
     return expr_mult_delta( op_mul(other) );
 }
 
@@ -379,6 +419,9 @@ HParser::expr_unary() {
        token_.type == decaf::token_type::OpLogNot) {
         return op_unary();
     }
+#ifdef DEBUG_EXPR
+    std::cout << "unary" << std::endl;
+#endif
     return factor();
 }
 
@@ -410,6 +453,9 @@ HParser::expr_list() {
 
 ExprNode*
 HParser::factor() {
+#ifdef DEBUG_EXPR
+    std::cout << "factor" << std::endl;
+#endif
     ExprNode* node = nullptr;
     if(token_.type == decaf::token_type::Number) {
         node = new NumberExprNode(token_.lexeme);
@@ -430,7 +476,7 @@ HParser::factor() {
             node = var;
         }
     } else {
-        error( decaf::token_type::Number );
+        error( decaf::token_type::Identifier );
     }
     return node;
 }
