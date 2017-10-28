@@ -104,7 +104,7 @@ HParser::statement_list() {
             node = new ContinueStmNode();
             match( decaf::token_type::ptSemicolon );
         }
-        else if(token_.type == decaf::token_type::ptLParen ) {
+        else if(token_.type == decaf::token_type::ptLBrace ) {
             node = statement_block();
         }
         else if(token_.type == decaf::token_type::Identifier ) {
@@ -446,7 +446,7 @@ HParser::more_expr(std::list<ExprNode*>* list) {
 std::list<ExprNode*>*
 HParser::expr_list() {
     if(token_.type == decaf::token_type::ptRParen)
-        return nullptr;
+        return new std::list<ExprNode*>();
     auto exr_list = new std::list<ExprNode*>();
     exr_list->push_back( expr() );
     more_expr(exr_list);
