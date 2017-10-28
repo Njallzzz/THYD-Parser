@@ -121,9 +121,9 @@ HParser::statement_list() {
 
 BlockStmNode*
 HParser::statement_block() {
-    match( decaf::token_type::ptLParen );
+    match( decaf::token_type::ptLBrace );
     std::list<StmNode*>* slist = statement_list();
-    match( decaf::token_type::ptRParen );
+    match( decaf::token_type::ptRBrace );
     return new BlockStmNode( slist );
 }
 
