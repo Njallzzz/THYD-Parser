@@ -134,18 +134,24 @@ private:
     ExprNode* expr_eq_delta(ExprNode* other);
     ExprNode* expr_rel();
     ExprNode* expr_rel_delta(ExprNode* other);
+    ExprNode* expr_add();
+    ExprNode* expr_add_delta(ExprNode* other);
+    ExprNode* expr_mult();
+    ExprNode* expr_mult_delta(ExprNode* other);
+    ExprNode* expr_unary();
 
     ExprNode* factor();
 
-    ExprNode* op_eq(ExprNode *lhs, ExprNode *rhs);
-    ExprNode* op_rel(ExprNode *lhs, ExprNode *rhs);
-    ExprNode* op_add(ExprNode *lhs, ExprNode *rhs);
-    ExprNode* op_mul(ExprNode *lhs, ExprNode *rhs);
-    ExprNode* op_unary(ExprNode *rhs);
+    ExprNode* op_eq(ExprNode *lhs);
+    ExprNode* op_rel(ExprNode *lhs);
+    ExprNode* op_add(ExprNode *lhs);
+    ExprNode* op_mul(ExprNode *lhs);
+    ExprNode* op_unary();
     IncrDecrStmNode* op_incr_decr( VariableExprNode *var );
 
     std::list<ExprNode*>* expr_list();
 
+    ExprNode* optional_expr();
     BlockStmNode* statement_block();
     BlockStmNode* optional_else();
     std::list<ParameterNode*>* parameters();
