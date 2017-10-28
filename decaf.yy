@@ -66,6 +66,14 @@ class Parser;
 %token OpLogOr
 %token OpLogNot
 
+%left OpLogOr 
+%left OpLogAnd 
+%left OpRelEQ OpRelNEQ
+%left OpArtPlus OpArtMinus
+%left OpArtMult OpArtDiv OpArtModulus
+%right OpLogNot
+
+
 %token <std::string> Identifier
 %token <std::string> Number
 %token <std::string> ErrUnknown
@@ -73,17 +81,17 @@ class Parser;
 %type <std::list<VariableDeclarationNode*>*> variable_declarations
 %type <std::list<VariableExprNode*>*> variable_list
 %type <std::list<ParameterNode*>*> parameters
+%type <std::list<ParameterNode*>*> parameter_list
 %type <std::list<MethodNode*>*> method_declarations
+%type <std::list<ExprNode*>*> more_expressions
 %type <std::list<ExprNode*>*> expression_list
 %type <std::list<StmNode*>*> statement_list
 %type <VariableExprNode*> variable
 %type <IncrDecrStmNode*> incr_decr_var
-%type <ParameterNode*> parameter_list
 %type <BlockStmNode*> statement_block
 %type <BlockStmNode*> optional_else
 %type <MethodNode*> method_declaration
 %type <ExprNode*> optional_expression
-%type <std::list<ExprNode*>*> more_expressions
 %type <ExprNode*> expression
 %type <ValueType> method_return_type
 %type <ValueType> type
@@ -126,16 +134,20 @@ method_declaration: kwStatic method_return_type Identifier
                     { $$ = new MethodNode($2, $3, $5, $8, $9); }
 
 method_return_type: type
+                    { $$ = $1; }
                     | kwVoid { $$ = ValueType::VoidVal; }
 
+
+
 parameters: parameter_list
-            { $$ = new std::list<ParameterNode*>(); $$->push_back( $1 );}
+            { $$ = $1; }
             | { $$ = new std::list<ParameterNode*>(); }
 
 parameter_list: type Identifier
-                { $$ = new ParameterNode($1, new VariableExprNode( $2 )); }
+                { $$ = new std::list<ParameterNode*>(); 
+                        $$->push_back(new ParameterNode($1, new VariableExprNode( $2 ))); }
                 |  parameter_list ptComma type Identifier
-                { $$ = new ParameterNode($3, new VariableExprNode( $4 )); }
+                { $$ = $1; $1->push_back(new ParameterNode($3, new VariableExprNode( $4 ))); }
 
 statement_list: statement_list statement
                 { $$ = $1; $$->push_back($2);}
@@ -174,12 +186,10 @@ incr_decr_var: variable OpArtInc
                  { $$ = new DecrStmNode($1); }
 
 optional_expression: expression 
-                    |{ $$ = nullptr; }
+                      { $$ = $1; }
+                    | { $$ = nullptr; }
 
-expression: variable { $$ = $1; }
-            | Number
-              { $$ = new NumberExprNode($1); }
-            | expression OpLogOr expression 
+expression: expression OpLogOr expression 
               { $$ = new OrExprNode($1, $3); }
             | expression OpLogAnd expression
               { $$ = new AndExprNode($1,$3); }
@@ -209,15 +219,22 @@ expression: variable { $$ = $1; }
               { $$ = new MethodCallExprStmNode($1, $3); } 
             | ptLParen expression ptRParen
               { $$ = $2; }
-            | + expression 
-            | - expression 
-            | ! expression 
+            | OpArtPlus expression 
+              { $$ = $2; }
+            | OpArtMinus expression 
+              { $$ = $2; }
+            | OpLogNot expression 
+              { $$ = $2; }
+            | variable 
+              { $$ = $1; }
+            | Number
+              { $$ = new NumberExprNode($1); }
             
 
 
 expression_list: expression more_expressions
                  { $$ = $2; $$->push_back($1); }
-                 | { $$ = nullptr;}
+                 | { $$ = new std::list<ExprNode*>(); } 
 
 more_expressions: ptComma expression more_expressions
                   { $$ = $3; $$->push_back($2); }
