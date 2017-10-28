@@ -131,25 +131,27 @@ BlockStmNode*
 HParser::optional_else() {
     if(token_.type != decaf::token_type::kwElse)
         return nullptr;
+    match( decaf::token_type::kwElse );
     return statement_block();
 };
 
 StmNode*
 HParser::id_start_stm() {
     StmNode* node;
-    VariableExprNode* var = variable();
+    std::string lex = token_.lexeme;
+    match( decaf::token_type::Identifier );
     if(token_.type == decaf::token_type::ptLParen) {
         match( decaf::token_type::ptLParen );
-        node = new MethodCallExprStmNode( var->str(), expr_list());
+        node = new MethodCallExprStmNode( lex, expr_list());
         match( decaf::token_type::ptRParen );
     }
     else if(token_.type == decaf::token_type::OpAssign) {
         match( decaf::token_type::OpAssign );
-        node = new AssignStmNode( var, expr() );
+        node = new AssignStmNode( new VariableExprNode(lex), expr() );
     }
     else if(token_.type == decaf::token_type::OpArtInc ||
             token_.type == decaf::token_type::OpArtDec) {
-        node = op_incr_decr( var );
+        node = op_incr_decr( new VariableExprNode(lex) );
     }
     else {
         error( decaf::token_type::OpAssign );
